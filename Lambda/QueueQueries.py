@@ -15,6 +15,10 @@ def queueQueries(event,context):
         response = table.scan(FilterExpression=Attr('test').not_exists())
 
     for item in response['Items']:
+        #remove fields which aren't used for queries, messing up downsteam anyway
+        item.pop('checksPerDay', None)
+        item.pop('creationTime', None)
+        
         sqs.send_message(QueueUrl=QUEUE_URL,MessageBody=str(item))
 
     return response['Count']
